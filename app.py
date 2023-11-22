@@ -14,7 +14,7 @@ mysql = pymysql.connect(
     host=app.config['MYSQL_DATABASE_HOST'],
     user=app.config['MYSQL_DATABASE_USER'],
     password=app.config['MYSQL_DATABASE_PASSWORD'],
-    db=app.config['MYSQL_DATABASE_DB']
+    db=app.config['MYSQL_DATABASE_DB'],
     port=app.config['MYSQL_PORT']
 )
 
