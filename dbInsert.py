@@ -2,6 +2,8 @@ from faker import Faker
 fake=Faker()
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_bcrypt import generate_password_hash
+
 
 import mysql.connector
 from mysql.connector import Error
@@ -50,16 +52,16 @@ parish = ['Portland','St Mary','St Thomas','St Ann','Kingston','St Andrew','St C
 #CustomerAccount(account_id, email, password, fname, lname, gender, date_of_birth, street, city, parish, telephone, created_on)
 def insertCusAcc(times):
     try:
-       connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+       connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
        cursor = connection.cursor(prepared=True)
 
        for _ in range(times):
            gen=gender[random.randint(0,1)]
            sql_insert_data_query="INSERT INTO CustomerAccount(email,password,fname,lname,gender,date_of_birth,street,city,parish,telephone,created_on) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
            if gen=='Male':
-               insert_tuple=(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"))
+               insert_tuple=(fake.email(),generate_password_hash(fake.password()),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"))
            else:
-               insert_tuple=(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today") )
+               insert_tuple=(fake.email(),generate_password_hash(fake.password()),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today") )
 
            cursor.execute(sql_insert_data_query,insert_tuple)
        connection.commit()
@@ -78,7 +80,7 @@ def insertCusAcc(times):
 #CustomerCreditCard(account_id, card_num)
 def insertCard(start,end):
     try:
-        connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+        connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
         cursor = connection.cursor(prepared=True)
         for i in range(start,end):
             # fetching information about customer from CustomerAccount table
@@ -110,7 +112,7 @@ def insertCard(start,end):
 
 #Branch(br_id, name, street, city, parish, telephone)
 def insertBranch():
-    connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+    connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
     cursor = connection.cursor(prepared=True)
     sql_insert_data_query="insert into Branch(br_id, name, street, city, parish, telephone) values('B01','branch1','williams','Stony Hill','Portland','(876)-799-7900')"
     cursor.execute( sql_insert_data_query)
@@ -127,7 +129,7 @@ def insertBranch():
 # Warehouse(wh_id, street, city, parish, telephone)
 def insertWarehouse(times):
     try:
-        connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+        connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
         cursor = connection.cursor(prepared=True)
         for _ in range(0,times):
             sql_insert_data_query="INSERT INTO Warehouse(street,city,parish,telephone) VALUES (%s,%s,%s,%s)"
@@ -147,50 +149,60 @@ def insertWarehouse(times):
 
 #WarehouseStock(warehouse_id, model_id, quantity) 
 #WarehouseModelItem(warehouse_id, model_id, product_id)
+#"""
 def insertWarehouseStock(times):
     try:
-        connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+        connection = mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
         cursor = connection.cursor(prepared=True)
-        sql_insert_data_query="insert into WarehouseStock(warehouse_id, model_id, quantity) VALUES (%s,%s,%s)"
-        sql_insert_data_query2="insert into WarehouseModelItem(warehouse_id, model_id, product_id) VALUES (%s,%s,%s)"
+        sql_insert_data_query = "insert into WarehouseStock(warehouse_id, model_id, quantity) VALUES (%s,%s,%s)"
+        sql_insert_data_query2 = "insert into WarehouseModelItem(warehouse_id, model_id, product_id) VALUES (%s,%s,%s)"
         cursor.execute("SELECT model_id FROM CompuStore.LaptopModel")
         result = cursor.fetchall()
 
-        for i in range(1,times):
+        # Print statement to check the values of result
+        #print("Model IDs:", result)
+
+        for i in range(1, times):
             for model_id in result:
-                
-                modelID=model_id[0].decode()
-                quantity = random.randint(250,500)
-                
-                insert_tuple=(i,modelID,quantity)
-                cursor.execute( sql_insert_data_query, insert_tuple)
-                
-                for _ in range(quantity): 
-                    product_id = random.randint(1,2147483647)
-                    insert_tuple2=(i,modelID,product_id)
-                    cursor.execute( sql_insert_data_query2, insert_tuple2)
-                    
+                modelID = model_id[0]
+                quantity = random.randint(250, 500)
+
+                # Print statements to check the values being inserted
+                print("Inserting into WarehouseStock:", i, modelID, quantity)
+
+                insert_tuple = (i, modelID, quantity)
+                cursor.execute(sql_insert_data_query, insert_tuple)
+
+                for _ in range(quantity):
+                    product_id = random.randint(1, 2147483647)
+
+                    # Print statements to check the values being inserted
+                    print("Inserting into WarehouseModelItem:", i, modelID, product_id)
+
+                    insert_tuple2 = (i, modelID, product_id)
+                    cursor.execute(sql_insert_data_query2, insert_tuple2)
+
         connection.commit()
-        print ("Date Record inserted successfully into WarehouseStore and WarehouseModelItem table")
-    except mysql.connector.Error as error :
-        print("Failed inserting date object into MySQL table {}".format(error))
+        print("Data Record inserted successfully into WarehouseStore and WarehouseModelItem table")
+    except mysql.connector.Error as error:
+        print("Failed inserting date object into MySQL table: {}".format(error))
     finally:
-        #closing database connection.
-        if(connection.is_connected()):
+        # closing database connection.
+        if connection.is_connected():
             cursor.close()
             connection.close()
-            print("MySQL connection is closed")    
+            print("MySQL connection is closed")
 
 if __name__ == '__main__':
-    
-    insertWarehouseStock(11)
+    insertCusAcc(1)
+
  
  
 #--------------------------------not important----------------------------------------------------------------------------------------------------            
 # #CustomerAccount(acc_id, email, password, fname, lname, gender, date_of_birth, street, city, parish, telephone, created_on)
 # def updateCusAcc(start,end):
 #     try:
-#       connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+#       connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
 #       cursor = connection.cursor(prepared=True)
 
 #       for i in range(start,end):
@@ -198,12 +210,12 @@ if __name__ == '__main__':
 #           sql_insert_data_query=""
 #           #sql_insert_data_query="INSERT INTO CustomerAccount(email,password,fname,lname,gender,date_of_birth,street,city,parish,telephone,created_on) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 #           if gen=='Male':
-#               #insert_tuple=(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"))
-#               sql_insert_data_query="UPDATE CustomerAccount set email='{}', password ='{}', fname='{}', lname='{}', gender='{}', date_of_birth='{}', street='{}', city='{}', parish='{}', telephone ='{}', created_on='{}' where acc_id ={}".format(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"),i)
+#               #insert_tuple=(fake.email(),generate_password_hash(fake.password()),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"))
+#               sql_insert_data_query="UPDATE CustomerAccount set email='{}', password ='{}', fname='{}', lname='{}', gender='{}', date_of_birth='{}', street='{}', city='{}', parish='{}', telephone ='{}', created_on='{}' where acc_id ={}".format(fake.email(),generate_password_hash(fake.password()),fake.first_name_male(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"),i)
 
 #           else:
-#               #insert_tuple=(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today") )
-#               sql_insert_data_query="UPDATE CustomerAccount set email='{}', password ='{}', fname='{}', lname='{}', gender='{}', date_of_birth='{}', street='{}', city='{}', parish='{}', telephone ='{}', created_on='{}' where acc_id ={}".format(fake.email(),generate_password_hash(fake.password(),"sha256"),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"),i)
+#               #insert_tuple=(fake.email(),generate_password_hash(fake.password()),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today") )
+#               sql_insert_data_query="UPDATE CustomerAccount set email='{}', password ='{}', fname='{}', lname='{}', gender='{}', date_of_birth='{}', street='{}', city='{}', parish='{}', telephone ='{}', created_on='{}' where acc_id ={}".format(fake.email(),generate_password_hash(fake.password()),fake.first_name_female(),fake.last_name(),gen,fake.date_of_birth(tzinfo=None, minimum_age=18, maximum_age=50),fake.street_address(),fake.city(),parish[random.randint(0,13)],phoneNumber(),fake.date_between(start_date="-10y", end_date="today"),i)
 #           print(sql_insert_data_query)
 #           cursor.execute(sql_insert_data_query)
 
@@ -222,7 +234,7 @@ if __name__ == '__main__':
 #CustomerCreditCard(acc_id, card_num)
 # def insertCard(start,end):
 #     try:
-#         connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+#         connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
 #         cursor = connection.cursor(prepared=True)
 #         for i in range(start,end):
 #             # fetching information about customer from CustomerAccount table
@@ -307,7 +319,7 @@ if __name__ == '__main__':
 # WarehouseStock(wh_id, model_id, quantity) need editing
 # def insertWaresStock(start,end):
 #     try:
-#         connection= mysql.connector.connect(host="localhost", user="root", password="", database="CompuStore")
+#         connection= mysql.connector.connect(host="localhost", user="root", password="Bh101299@", database="CompuStore")
 #         cursor = connection.cursor(prepared=True)
 #         for _ in range(start,end):
 #             sql_insert_data_query="INSERT INTO Warehouse(model_id,quantity) VALUES (%s,%s)"

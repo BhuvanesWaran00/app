@@ -7,7 +7,7 @@
 #### Step 1)
 ```
 to add database schema type mysql -u root -h localhost -p press enter, press enter again 
-Then type source CompuStore.sql and press enter
+Then type source C:\Users\Bhuvanesh\OneDrive\Desktop\app1\ecommerce-website-flask\compuStore.sql CompuStore.sql and press enter
 ```
 
 #### Step 2)
